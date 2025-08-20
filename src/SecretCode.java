@@ -42,10 +42,11 @@ public class SecretCode {
   }
 
   public static void main(String[] args) {
+    System.out.println("=== ThinhGuesser ===");
     long t1 = System.currentTimeMillis();
     new SecretCodeGuesser().start();
     long t2 = System.currentTimeMillis();
-    System.out.println("Time taken: " + (t2-t1) + " ms");
+    System.out.println("Time taken: " + (t2-t1) + " ms\n");
 
     System.out.println("=== CaelumGuesser ===");
     long t3 = System.currentTimeMillis();
