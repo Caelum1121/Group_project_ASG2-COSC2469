@@ -46,5 +46,11 @@ public class SecretCode {
     new SecretCodeGuesser().start();
     long t2 = System.currentTimeMillis();
     System.out.println("Time taken: " + (t2-t1) + " ms");
+
+    System.out.println("=== CaelumGuesser ===");
+    long t3 = System.currentTimeMillis();
+    new CaelumGuesser().start();
+    long t4 = System.currentTimeMillis();
+    System.out.println("Total Time taken: " + (t4 - t3) + " ms\n");
   }
 }
