@@ -4,7 +4,7 @@ public class SecretCode {
 
   public SecretCode() {
     // for the real test, your program will not know this
-    correctCode = "UUUUUU"; //BACXIUBACXIU
+    correctCode = "XXXX"; //BACXIUBACXIU
     counter = 0;
   }
 

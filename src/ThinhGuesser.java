@@ -26,18 +26,25 @@ public class ThinhGuesser {
   }
 
   private int determineLength(SecretCode code) {
-    // We must hit the exact length to avoid -2. Probe from 1 upwards.
-    // Use a safe upper bound; adjust as needed for the judge.
-    final int MAX_LENGTH = 128;
-    for (int candidateLength = 1; candidateLength <= MAX_LENGTH; candidateLength++) {
-      String candidate = repeatChar('B', candidateLength);
+    int lengthDetectionGuesses = 0;
+    
+    // Smart linear search optimized for short lengths (≤18)
+    // Start with common short lengths first, then systematic search
+    int[] priorityLengths = {1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 18, 9, 11, 13, 14, 16, 17};
+    
+    for (int len : priorityLengths) {
+      String candidate = repeatChar('B', len);
       int result = callGuess(code, candidate);
+      lengthDetectionGuesses++;
+      
       if (result != -2) {
-        // Cache the matches for 'B' at the correct length to avoid a redundant probe later
+        // Found valid length
         lastBMatchesAtCorrectLength = result;
-        return candidateLength;
+        return len;
       }
     }
+    
+    // If we reach here, no valid length found (shouldn't happen for valid secret codes)
     return -1;
   }
 
