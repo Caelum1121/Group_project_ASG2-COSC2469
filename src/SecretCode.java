@@ -44,7 +44,7 @@ public class SecretCode {
   public static void main(String[] args) {
       System.out.println("=== ThinhGuesser ===");
       long t1 = System.currentTimeMillis();
-      new ThinhGuesser().start();
+      new SecretCodeGuesser().start();
       long t2 = System.currentTimeMillis();
       System.out.println("Time taken: " + (t2-t1) + " ms\n");
 

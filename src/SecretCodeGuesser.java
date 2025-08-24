@@ -1,4 +1,4 @@
-public class ThinhGuesser {
+public class SecretCodeGuesser {
 
   private static final char[] ALPHABET = new char[] {'B', 'A', 'C', 'X', 'I', 'U'};
   private int lastBMatchesAtCorrectLength = -1;
