@@ -30,7 +30,6 @@ public class OptimizedGuesser { //findLengthBinary, trySingleCharacterPatterns, 
 
     public void start() {
         SecretCode code = new SecretCode();
-        long startTime = System.currentTimeMillis();
 
         int correctLength = findLength(code);
         System.out.println("Found length: " + correctLength);
@@ -38,9 +37,7 @@ public class OptimizedGuesser { //findLengthBinary, trySingleCharacterPatterns, 
         initializeDataStructures(correctLength);
         String secretCode = solveWithOptimizedStrategy(code, correctLength);
 
-        long endTime = System.currentTimeMillis();
         System.out.println("I found the secret code. It is " + secretCode);
-        System.out.println("Time taken: " + (endTime - startTime) + " ms");
     }
 
     private int findLength(SecretCode code) {
