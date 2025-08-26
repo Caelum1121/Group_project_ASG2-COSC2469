@@ -4,7 +4,7 @@ public class SecretCode {
 
   public SecretCode() {
     // for the real test, your program will not know this
-    correctCode = "XXXX"; //BACXIUBACXIU
+    correctCode = "BACXIUBACXIU"; //BACXIUBACXIU
     counter = 0;
   }
 
@@ -42,11 +42,17 @@ public class SecretCode {
   }
 
   public static void main(String[] args) {
-      System.out.println("=== ThinhGuesser ===");
+      System.out.println("=== SecretCodeGuesser ===");
       long t1 = System.currentTimeMillis();
       new SecretCodeGuesser().start();
       long t2 = System.currentTimeMillis();
       System.out.println("Time taken: " + (t2-t1) + " ms\n");
+
+      System.out.println("=== OptimizedGuesser ===");
+      long t3 = System.currentTimeMillis();
+      new OptimizedGuesser().start();
+      long t4 = System.currentTimeMillis();
+      System.out.println("Time taken: " + (t4-t3) + " ms\n");
 
   }
 }
