@@ -30,7 +30,7 @@ public class SecretCodeGuesser {
     
     // Smart linear search optimized for short lengths (≤18)
     // Start with common short lengths first, then systematic search
-    int[] priorityLengths = {1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 18, 9, 11, 13, 14, 16, 17};
+    int[] priorityLengths = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
     
     for (int len : priorityLengths) {
       String candidate = repeatChar('B', len);
