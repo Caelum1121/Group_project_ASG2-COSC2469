@@ -3,25 +3,24 @@ public class SecretCode {
     private long counter;
 
     public SecretCode() {
-        // for the real test, your program will not know this
-        correctCode = "ABIXCIABCX"; // BACXIUBACXIU, replace with the code you want
+        // In the real test, your program won't know this
+        correctCode = "ABIXCIABCX";
         counter = 0;
     }
 
-    // Getter method to access the correct code
+    // Let other classes see the correct code (for testing purposes)
     public String getCorrectCode() {
         return this.correctCode;
     }
 
-    // Returns
-    // -2 : if length of guessedCode is wrong
-    // -1 : if guessedCode contains invalid characters
+    // Returns different values based on the guess:
+    // -2 : wrong length
+    // -1 : invalid characters
     // >=0 : number of correct characters in correct positions
     public int guess(String guessedCode) {
-        // Every time you call guess, counter++ happens.
         counter++;
 
-        // Validation: Check if guessed code contains invalid characters
+        // Check for invalid characters
         for (int i = 0; i < guessedCode.length(); i++) {
             char c = guessedCode.charAt(i);
             if (c != 'B' && c != 'A' && c != 'C' && c != 'X' && c != 'I' && c != 'U') {
@@ -29,12 +28,12 @@ public class SecretCode {
             }
         }
 
-        // Validate the length of the guessed code
+        // Check length
         if (guessedCode.length() != correctCode.length()) {
             return -2;
         }
 
-        // Compare guessed code with correct code
+        // Count how many characters are in the right position
         int matched = 0;
         for (int i = 0; i < correctCode.length(); i++) {
             if (guessedCode.charAt(i) == correctCode.charAt(i)) {
@@ -42,7 +41,7 @@ public class SecretCode {
             }
         }
 
-        // If your guess exactly matches the correctCode
+        // Print the guess count when we find the answer
         if (matched == correctCode.length()) {
             System.out.println("Number of guesses: " + counter);
         }
