@@ -89,60 +89,67 @@ public class SecretCodeGuesser {
     }
 
     // 3) Resolve each position with minimal tests, guided by remaining counts
-    for (int pos = 0; pos < length; pos++) {
-      if (resolved[pos]) continue;
+      for (int pos = 0; pos < length; pos++) {
+          if (resolved[pos]) continue;
 
-      // Early stop optimization: if all remaining must be baseline, assign them
-      int remainingPositions = length - resolvedCount;
-      if (remainingPositions == remainingByLetter[baselineIndex]) {
-        // The rest are baseline letter; no more guesses needed per position
-        for (int j = pos; j < length; j++) {
-          if (!resolved[j]) {
-            current[j] = baselineLetter;
-            resolved[j] = true;
-            resolvedCount++;
+          // Unchanged: early stop if all remaining are baseline
+          int remainingPositions = length - resolvedCount;
+          if (remainingPositions == remainingByLetter[baselineIndex]) {
+              for (int j = pos; j < length; j++) {
+                  if (!resolved[j]) {
+                      current[j] = baselineLetter;
+                      resolved[j] = true;
+                      resolvedCount++;
+                  }
+              }
+              break;
           }
-        }
-        break;
-      }
 
-      // Try candidate letters in descending remaining count (excluding baseline and zeros)
-      int[] order = orderByCountsDescending(remainingByLetter);
-      boolean foundForThisPos = false;
-      for (int idx : order) {
-        if (idx == baselineIndex) continue;
-        if (remainingByLetter[idx] <= 0) continue;
+          // Unchanged: get current order
+          int[] order = orderByCountsDescending(remainingByLetter);
+          boolean foundForThisPos = false;
+          for (int idx : order) {
+              if (idx == baselineIndex) continue;
+              if (remainingByLetter[idx] <= 0) continue;
 
-        char candidate = ALPHABET[idx];
-        char original = current[pos];
-        current[pos] = candidate;
-        int newScore = callGuess(code, String.valueOf(current));
+              char candidate = ALPHABET[idx];
+              char original = current[pos];
+              current[pos] = candidate;
+              int newScore = callGuess(code, String.valueOf(current));
 
-        if (newScore > currentScore) {
-          // This position is the candidate letter
-          currentScore = newScore;
-          resolved[pos] = true;
-          resolvedCount++;
-          remainingByLetter[idx]--;
-          foundForThisPos = true;
-          break;
-        }
+              if (newScore > currentScore) {
+                  // Unchanged: correct candidate
+                  currentScore = newScore;
+                  resolved[pos] = true;
+                  resolvedCount++;
+                  remainingByLetter[idx]--;
+                  foundForThisPos = true;
+                  break;
+              } else if (newScore < currentScore) {
+                  // NEW: Detects baseline position early (original was correct)
+                  current[pos] = original; // Revert
+                  resolved[pos] = true;
+                  resolvedCount++;
+                  remainingByLetter[baselineIndex]--;
+                  foundForThisPos = true;
+                  break; // Stop trying more for this pos
+              } else {
+                  // Unchanged: wrong, revert and continue
+                  current[pos] = original;
+              }
+          }
 
-        // Not this letter; revert
-        current[pos] = original;
-      }
+          if (!foundForThisPos) {
+              // Unchanged: assume baseline (only reaches here if no -1 or +1, i.e., all 0 deltas and exhausted candidates)
+              resolved[pos] = true;
+              resolvedCount++;
+              remainingByLetter[baselineIndex]--;
+          }
 
-      if (!foundForThisPos) {
-        // Must be the baseline letter at this position
-        resolved[pos] = true;
-        resolvedCount++;
-        remainingByLetter[baselineIndex]--;
-      }
+          if (currentScore == length) {
+              return String.valueOf(current);
+          }
 
-      if (currentScore == length) {
-        // Secret fully matched; guess() already printed the count
-        return String.valueOf(current);
-      }
     }
 
     // Final confirmation guess to trigger success print if not already triggered
