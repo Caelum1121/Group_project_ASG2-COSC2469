@@ -56,10 +56,18 @@ public class SecretCodeGuesser {
       char letter = ALPHABET[i];
       int matches;
       if (letter == 'B' && lastBMatchesAtCorrectLength >= 0) {
-        matches = lastBMatchesAtCorrectLength;
+          String guess = repeatChar(letter, length);
+          matches = lastBMatchesAtCorrectLength;
+          if (matches == length) {
+              return guess;
+          }
+
       } else {
         String guess = repeatChar(letter, length);
         matches = callGuess(code, guess);
+        if (matches == length) {
+            return guess;
+        }
       }
       // matches >= 0 here because length is correct and letters are valid
       letterCounts[i] = Math.max(0, matches);
