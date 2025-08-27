@@ -22,16 +22,10 @@ public class SecretCodeGuesser {
   }
 
   private int determineLength(SecretCode code) {
-    int lengthDetectionGuesses = 0;
-
-    // Try different lengths starting from 1 until we get a valid response
-    int[] priorityLengths = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
-
-    for (int len : priorityLengths) {
+    // Try different lengths from 0 to 18 inclusive
+    for (int len = 0; len <= 18; len++) {
       String candidate = repeatChar('B', len);
       int result = callGuess(code, candidate);
-      lengthDetectionGuesses++;
-
       if (result != -2) {
         // Found the right length - save this result for later
         lastBMatchesAtCorrectLength = result;
