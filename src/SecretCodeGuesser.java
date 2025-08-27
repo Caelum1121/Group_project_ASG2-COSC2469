@@ -2,7 +2,6 @@ public class SecretCodeGuesser {
 
   private static final char[] ALPHABET = new char[] {'B', 'A', 'C', 'X', 'I', 'U'};
   private int lastBMatchesAtCorrectLength = -1;
-  private int localGuessCount = 0;
 
   public void start() {
     SecretCode code = new SecretCode();
@@ -134,7 +133,6 @@ public class SecretCodeGuesser {
   }
 
   private int callGuess(SecretCode code, String guess) {
-    localGuessCount++;
     return code.guess(guess);
   }
 
@@ -146,10 +144,6 @@ public class SecretCodeGuesser {
     char[] arr = new char[length];
     for (int i = 0; i < length; i++) arr[i] = c;
     return arr;
-  }
-
-  private int[] indicesSortedByDescendingCounts(int[] counts) {
-    return orderByCountsDescending(counts);
   }
 
   private int[] orderByCountsDescending(int[] counts) {
