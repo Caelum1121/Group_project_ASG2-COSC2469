@@ -19,10 +19,7 @@ public class SecretCodeGuesser {
     System.out.println("I found the secret code. It is " + found);
 
     // Print concise complexity info for the submission report
-    System.out.println("n = " + length + ", k = " + ALPHABET.length);
-    System.out.println("Total guess() calls: " + localGuessCount + " (upper bound ≈ " + (ALPHABET.length * length + ALPHABET.length + 1) + ")");
-    System.out.println("Time complexity (with guess O(n)): O(n^2); Space: O(n)");
-    System.out.println("If guess is O(1): Time: O(n); Space: O(n)");
+    System.out.println("Found length: " + length );
   }
 
   private int determineLength(SecretCode code) {
