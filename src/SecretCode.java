@@ -4,8 +4,8 @@ public class SecretCode {
 
     public SecretCode() {
         // for the real test, your program will not know this
-        correctCode = "UXIABCUXIABCUXIABC";
-        // worst case: UXIABCUXIABCUXIABC (maybe)
+        correctCode = "UIXCABUIXCABUIXCAB";
+        // worst case: UIXCABUIXCABUIXCAB (maybe)
         // best case: B
         // avg case:
         counter = 0;
