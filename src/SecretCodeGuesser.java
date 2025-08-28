@@ -1,200 +1,242 @@
 public class SecretCodeGuesser {
 
-  private static final char[] ALPHABET = new char[] {'B', 'A', 'C', 'X', 'I', 'U'};
-  private int lastBMatchesAtCorrectLength = -1;
-  private int localGuessCount = 0;
+    // Available alphabet for constructing guesses
+    private static final char[] ALPHABET = new char[] {'B', 'A', 'C', 'X', 'I', 'U'};
 
-  public void start() {
-    SecretCode code = new SecretCode();
+    // Cache the number of 'B' matches at correct length to avoid redundant guess
+    private int lastBMatchesAtCorrectLength = -1;
+    /**
+     * Main entry point that orchestrates the two-phase code breaking process:
+     * Phase 1: Determine the correct length of the secret code
+     * Phase 2: Deduce the actual code using differential feedback analysis
+     */
+    public void start() {
+        SecretCode code = new SecretCode();
 
-    // Phase 1: determine correct length by probing lengths until not -2
-    int length = determineLength(code);
-    if (length <= 0) {
-      System.out.println("Failed to determine secret code length.");
-      return;
-    }
-
-    // Phase 2: deduce code efficiently using differential feedback
-    String found = deduceCode(code, length);
-    System.out.println("I found the secret code. It is " + found);
-
-    // Print concise complexity info for the submission report
-    System.out.println("Found length: " + length );
-  }
-
-  private int determineLength(SecretCode code) {
-    int lengthDetectionGuesses = 0;
-    
-    // Smart linear search optimized for short lengths (≤18)
-    // Start with common short lengths first, then systematic search
-    int[] priorityLengths = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18};
-    
-    for (int len : priorityLengths) {
-      String candidate = repeatChar('B', len);
-      int result = callGuess(code, candidate);
-      lengthDetectionGuesses++;
-      
-      if (result != -2) {
-        // Found valid length
-        lastBMatchesAtCorrectLength = result;
-        return len;
-      }
-    }
-    
-    // If we reach here, no valid length found (shouldn't happen for valid secret codes)
-    return -1;
-  }
-
-  private String deduceCode(SecretCode code, int length) {
-    // 1) Measure per-letter exact-position counts using uniform strings
-    int[] letterCounts = new int[ALPHABET.length];
-    // We already know the length, but not which uniform guess matched how many.
-    for (int i = 0; i < ALPHABET.length; i++) {
-      char letter = ALPHABET[i];
-      int matches;
-      if (letter == 'B' && lastBMatchesAtCorrectLength >= 0) {
-          String guess = repeatChar(letter, length);
-          matches = lastBMatchesAtCorrectLength;
-          if (matches == length) {
-              return guess;
-          }
-
-      } else {
-        String guess = repeatChar(letter, length);
-        matches = callGuess(code, guess);
-        if (matches == length) {
-            return guess;
+        // Phase 1: determine correct length by probing lengths until not -2
+        int length = determineLength(code);
+        if (length <= 0) {
+            System.out.println("Failed to determine secret code length.");
+            return;
         }
-      }
-      // matches >= 0 here because length is correct and letters are valid
-      letterCounts[i] = Math.max(0, matches);
+
+        // Phase 2: deduce code efficiently using differential feedback
+        String found = deduceCode(code, length);
+        System.out.println("I found the secret code. It is " + found);
+
+        // Print concise complexity info for the submission report
+        System.out.println("Found length: " + length );
     }
 
-    // 2) Choose the baseline letter with the highest count
-    int baselineIndex = 0;
-    for (int i = 1; i < ALPHABET.length; i++) {
-      if (letterCounts[i] > letterCounts[baselineIndex]) {
-        baselineIndex = i;
-      }
+    /**
+     * Phase 1: Determines the correct length of the secret code
+     * Uses linear search, testing lengths 1-18 with uniform 'B' strings
+     * Returns the length when feedback is not -2 (invalid length indicator)
+     */
+    private int determineLength(SecretCode code) {
+
+        // Linear search for length in range [1, 18]
+        for (int len = 1; len <= 18; len++) {
+            // Create a candidate string of all 'B's at current test length
+            String candidate = repeatChar('B', len);
+            int result = callGuess(code, candidate);
+
+            // If result is not -2, we found a valid length
+            // -2 typically indicates "wrong length" in mastermind-style games
+            if (result != -2) {
+                // Found valid length - cache the 'B' match count for Phase 2
+                lastBMatchesAtCorrectLength = result;
+                return len;
+            }
+        }
+
+        // If we reach here, no valid length found (shouldn't happen for valid secret codes)
+        return -1;
     }
 
-    char baselineLetter = ALPHABET[baselineIndex];
-    char[] current = repeatCharArray(baselineLetter, length);
-    int currentScore = letterCounts[baselineIndex];
+    /**
+     * Phase 2: Deduces the actual secret code using a sophisticated differential analysis approach
+     * Strategy:
+     * 1. Measure how many times each letter appears in correct positions using uniform strings
+     * 2. Choose the most frequent letter as baseline (appears in most positions)
+     * 3. Systematically test each position by substituting candidates and analyzing score changes
+     */
+    private String deduceCode(SecretCode code, int length) {
+        // Step 1: Measure per-letter exact-position counts using uniform strings
+        // This tells us how many positions each letter occupies in the secret code
+        int[] letterCounts = new int[ALPHABET.length];
 
-    // Remaining counts guide which letters are still plausible overall
-    int[] remainingByLetter = letterCounts.clone();
+        // Test each letter by making a uniform string (e.g., "BBBB", "AAAA", etc.)
+        for (int i = 0; i < ALPHABET.length; i++) {
+            char letter = ALPHABET[i];
+            int matches;
 
-    boolean[] resolved = new boolean[length];
-    int resolvedCount = 0;
+            // Optimization: reuse cached result for 'B' from length determination phase
+            if (letter == 'B' && lastBMatchesAtCorrectLength >= 0) {
+                String guess = repeatChar(letter, length);
+                matches = lastBMatchesAtCorrectLength;
+                // If all positions match, we found the code (all same letter)
+                if (matches == length) {
+                    return guess;
+                }
 
-    // If all positions are baseline already, we're done.
-    if (currentScore == length) {
-      return String.valueOf(current);
+            } else {
+                // Test uniform string of this letter
+                String guess = repeatChar(letter, length);
+                matches = callGuess(code, guess);
+                if (matches == length) {
+                    return guess; // Found uniform solution
+                }
+            }
+            // Store count of positions where this letter appears correctly
+            letterCounts[i] = Math.max(0, matches);
+        }
+
+        // Step 2: Choose the baseline letter (appears in most positions)
+        // This minimizes the number of position-by-position tests needed
+        int baselineIndex = 0;
+        for (int i = 1; i < ALPHABET.length; i++) {
+            if (letterCounts[i] > letterCounts[baselineIndex]) {
+                baselineIndex = i;
+            }
+        }
+
+        char baselineLetter = ALPHABET[baselineIndex];
+        // Start with all positions set to baseline letter
+        char[] current = repeatCharArray(baselineLetter, length);
+        int currentScore = letterCounts[baselineIndex];
+
+        // Track remaining letter counts to guide search efficiency
+        int[] remainingByLetter = letterCounts.clone();
+
+        // Track which positions have been definitively resolved
+        boolean[] resolved = new boolean[length];
+        int resolvedCount = 0;
+
+        // If all positions are baseline already, we're done
+        if (currentScore == length) {
+            return String.valueOf(current);
+        }
+
+        // Step 3: Resolve each position using minimal tests with differential feedback
+        for (int pos = 0; pos < length; pos++) {
+            if (resolved[pos]) continue;
+
+            // Optimization: if remaining positions equal remaining baseline count,
+            // all remaining positions must be baseline
+            int remainingPositions = length - resolvedCount;
+            if (remainingPositions == remainingByLetter[baselineIndex]) {
+                for (int j = pos; j < length; j++) {
+                    if (!resolved[j]) {
+                        current[j] = baselineLetter;
+                        resolved[j] = true;
+                        resolvedCount++;
+                    }
+                }
+                break;
+            }
+
+            // Get letters ordered by remaining count (most promising first)
+            int[] order = orderByCountsDescending(remainingByLetter);
+            boolean foundForThisPos = false;
+
+            // Test candidate letters for this position in order of likelihood
+            for (int idx : order) {
+                if (idx == baselineIndex) continue; // Skip baseline (already set)
+                if (remainingByLetter[idx] <= 0) continue; // Skip exhausted letters
+
+                char candidate = ALPHABET[idx];
+                char original = current[pos];
+
+                // Temporarily substitute candidate and test
+                current[pos] = candidate;
+                int newScore = callGuess(code, String.valueOf(current));
+
+                if (newScore > currentScore) {
+                    // Score increased: candidate is correct for this position
+                    currentScore = newScore;
+                    resolved[pos] = true;
+                    resolvedCount++;
+                    remainingByLetter[idx]--; // Decrement remaining count for this letter
+                    foundForThisPos = true;
+                    break;
+                } else if (newScore < currentScore) {
+                    // Score decreased: original (baseline) was correct for this position
+                    // This is an optimization that detects baseline positions early
+                    current[pos] = original; // Revert to baseline
+                    resolved[pos] = true;
+                    resolvedCount++;
+                    remainingByLetter[baselineIndex]--; // Decrement baseline count
+                    foundForThisPos = true;
+                    break; // Stop testing more candidates for this position
+                } else {
+                    // Score unchanged: candidate is wrong, revert and try next
+                    current[pos] = original;
+                }
+            }
+
+            // If no candidate changed the score, assume baseline is correct
+            if (!foundForThisPos) {
+                resolved[pos] = true;
+                resolvedCount++;
+                remainingByLetter[baselineIndex]--;
+            }
+
+            // Early termination if we've found all positions
+            if (currentScore == length) {
+                return String.valueOf(current);
+            }
+        }
+
+        // Final confirmation guess to trigger success print if not already triggered
+        callGuess(code, String.valueOf(current));
+        return String.valueOf(current);
     }
 
-    // 3) Resolve each position with minimal tests, guided by remaining counts
-      for (int pos = 0; pos < length; pos++) {
-          if (resolved[pos]) continue;
-
-          // Unchanged: early stop if all remaining are baseline
-          int remainingPositions = length - resolvedCount;
-          if (remainingPositions == remainingByLetter[baselineIndex]) {
-              for (int j = pos; j < length; j++) {
-                  if (!resolved[j]) {
-                      current[j] = baselineLetter;
-                      resolved[j] = true;
-                      resolvedCount++;
-                  }
-              }
-              break;
-          }
-
-          // Unchanged: get current order
-          int[] order = orderByCountsDescending(remainingByLetter);
-          boolean foundForThisPos = false;
-          for (int idx : order) {
-              if (idx == baselineIndex) continue;
-              if (remainingByLetter[idx] <= 0) continue;
-
-              char candidate = ALPHABET[idx];
-              char original = current[pos];
-              current[pos] = candidate;
-              int newScore = callGuess(code, String.valueOf(current));
-
-              if (newScore > currentScore) {
-                  // Unchanged: correct candidate
-                  currentScore = newScore;
-                  resolved[pos] = true;
-                  resolvedCount++;
-                  remainingByLetter[idx]--;
-                  foundForThisPos = true;
-                  break;
-              } else if (newScore < currentScore) {
-                  // NEW: Detects baseline position early (original was correct)
-                  current[pos] = original; // Revert
-                  resolved[pos] = true;
-                  resolvedCount++;
-                  remainingByLetter[baselineIndex]--;
-                  foundForThisPos = true;
-                  break; // Stop trying more for this pos
-              } else {
-                  // Unchanged: wrong, revert and continue
-                  current[pos] = original;
-              }
-          }
-
-          if (!foundForThisPos) {
-              // Unchanged: assume baseline (only reaches here if no -1 or +1, i.e., all 0 deltas and exhausted candidates)
-              resolved[pos] = true;
-              resolvedCount++;
-              remainingByLetter[baselineIndex]--;
-          }
-
-          if (currentScore == length) {
-              return String.valueOf(current);
-          }
-
+    /**
+     * Wrapper for SecretCode.guess() that tracks the number of guesses made
+     */
+    private int callGuess(SecretCode code, String guess) {
+        return code.guess(guess);
     }
 
-    // Final confirmation guess to trigger success print if not already triggered
-    callGuess(code, String.valueOf(current));
-    return String.valueOf(current);
-  }
-
-  private int callGuess(SecretCode code, String guess) {
-    localGuessCount++;
-    return code.guess(guess);
-  }
-
-  private String repeatChar(char c, int length) {
-    return String.valueOf(repeatCharArray(c, length));
-  }
-
-  private char[] repeatCharArray(char c, int length) {
-    char[] arr = new char[length];
-    for (int i = 0; i < length; i++) arr[i] = c;
-    return arr;
-  }
-
-  private int[] indicesSortedByDescendingCounts(int[] counts) {
-    // Deprecated; kept for compatibility if referenced elsewhere
-    return orderByCountsDescending(counts);
-  }
-
-  private int[] orderByCountsDescending(int[] counts) {
-    int k = counts.length;
-    int[] order = new int[k];
-    boolean[] used = new boolean[k];
-    for (int r = 0; r < k; r++) {
-      int best = -1;
-      for (int i = 0; i < k; i++) {
-        if (used[i]) continue;
-        if (best == -1 || counts[i] > counts[best]) best = i;
-      }
-      order[r] = best;
-      used[best] = true;
+    /**
+     * Utility: Creates a string of repeated characters
+     */
+    private String repeatChar(char c, int length) {
+        return String.valueOf(repeatCharArray(c, length));
     }
-    return order;
-  }
+
+    /**
+     * Utility: Creates a character array of repeated characters
+     */
+    private char[] repeatCharArray(char c, int length) {
+        char[] arr = new char[length];
+        for (int i = 0; i < length; i++) arr[i] = c;
+        return arr;
+    }
+
+    /**
+     * Returns indices of the counts array sorted by descending count values
+     * Used to prioritize testing letters that are more likely to appear
+     * in remaining positions (greedy optimization)
+     */
+    private int[] orderByCountsDescending(int[] counts) {
+        int k = counts.length;
+        int[] order = new int[k];
+        boolean[] used = new boolean[k];
+
+        // Simple selection sort to find indices in descending count order
+        for (int r = 0; r < k; r++) {
+            int best = -1;
+            // Find the unused index with highest count
+            for (int i = 0; i < k; i++) {
+                if (used[i]) continue;
+                if (best == -1 || counts[i] > counts[best]) best = i;
+            }
+            order[r] = best;
+            used[best] = true;
+        }
+        return order;
+    }
 }

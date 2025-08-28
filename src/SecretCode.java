@@ -1,10 +1,10 @@
 public class SecretCode {
-    private String correctCode;
+    private final String correctCode;
     private long counter;
 
     public SecretCode() {
         // for the real test, your program will not know this
-        correctCode = "AUICXUAIBIUACIUX";
+        correctCode = "BACCCCCXIU";
         counter = 0;
     }
     // Returns
