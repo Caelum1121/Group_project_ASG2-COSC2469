@@ -4,7 +4,10 @@ public class SecretCode {
 
     public SecretCode() {
         // for the real test, your program will not know this
-        correctCode = "BACCCCCXIU";
+        correctCode = "UXIABCUXIABCUXIABC";
+        // worst case: UXIABCUXIABCUXIABC (maybe)
+        // best case: B
+        // avg case:
         counter = 0;
     }
     // Returns
