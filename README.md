@@ -24,9 +24,9 @@ Lecturer: Huo Chong Ling
 ## 🔢 Contribution:
 Total Members: 4 (20 points)
 
-| Student Name       | Score |
-|--------------------|-------|
-| Chang Fang Cih     |   5   |
-| Nguyen Ngan Anh    |   5   |
-| Do Minh Thinh      |   5   |
-| Tran Hoang Nguyen  |   5   |
+| Student Name       | Score  |
+|--------------------|--------|
+| Chang Fang Cih     |    5   |
+| Nguyen Ngan Anh    |    5   |
+| Do Minh Thinh      |    5   |
+| Tran Hoang Nguyen  |    5   |
