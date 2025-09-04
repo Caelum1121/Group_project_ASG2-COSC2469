@@ -26,7 +26,7 @@ Total Members: 4 (20 points)
 
 | Student Name       | Score |
 |--------------------|-------|
-| Chang Fang Cih     |       |
-| Nguyen Ngan Anh    |       |
-| Do Minh Thinh      |       |
-| Tran Hoang Nguyen  |       |
+| Chang Fang Cih     |   5   |
+| Nguyen Ngan Anh    |   5   |
+| Do Minh Thinh      |   5   |
+| Tran Hoang Nguyen  |   5   |
