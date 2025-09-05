@@ -7,7 +7,7 @@ public class SecretCode {
         correctCode = "UIXCABUIXCABUIXCAB";
         // worst case: UIXCABUIXCABUIXCAB (maybe)
         // best case: B
-        // avg case:
+        // avg case:BACXIUBACXIU
         counter = 0;
     }
     // Returns
